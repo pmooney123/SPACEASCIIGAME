@@ -5,10 +5,16 @@ public class AsciiImage {
     public int width;
     public int height;
 
-    public AsciiImage(int width, int height, int type, int radius, int polarity) {
+    Color colorShallow;
+    Color colorDeep;
+
+    public AsciiImage(int width, int height, int type, int radius, int polarity, Color colorShallow, Color colorDeep) {
         this.width = width;
         this.height = height;
         pixels = new Tile[width][height];
+        this.colorDeep = colorDeep;
+        this.colorShallow = colorShallow;
+        /*
         switch (type) {
             case (0): //earthlike
                 for (int x = 0; x < width; x++) {
@@ -39,8 +45,12 @@ public class AsciiImage {
                 }
                 break;
         }
-
-
+         */
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                pixels[x][y] = Math.random() < 0.5 ? Tile.PLANETDEEP : Tile.PLANETSHALLOW;
+            }
+        }
 
         int centerX = width/2;
         int centerY = height/2;
@@ -67,7 +77,24 @@ public class AsciiImage {
             }
         }
     }
+    public void displayThis(AsciiPanel terminal, int xcorner, int ycorner) {
 
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    char glyph = pixels[x][y].glyph();
+
+                    if (pixels[x][y] == Tile.PLANETSHALLOW) {
+                        terminal.write(glyph, x + xcorner, y + ycorner, colorShallow);
+                    } else if ((pixels[x][y] == Tile.PLANETDEEP)) {
+                        terminal.write(glyph, x + xcorner, y + ycorner, colorDeep);
+
+                    } else {
+                        terminal.write(glyph, x + xcorner, y + ycorner, pixels[x][y].color());
+                    }
+                }
+            }
+
+    }
     public double distance(int x, int x2, int y, int y2) {
         return Math.sqrt((x2 - x)*(x2 - x) + (y2 - y) *(y2 - y));
     }

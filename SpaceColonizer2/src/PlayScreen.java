@@ -14,7 +14,7 @@ public class PlayScreen implements Screen {
     private final int screenWidth;
     private final int screenHeight;
     public ArrayList<String> input = new ArrayList<String>();
-    public boolean blinker = false;
+    public static boolean blinker = false;
     public ArrayList<String> output = new ArrayList<>();
     private boolean paused = false;
     private int describing = 0;
@@ -118,12 +118,12 @@ public class PlayScreen implements Screen {
             planet.setProduction();
         }
     }
-    public void blinker(AsciiPanel terminal, int x, int y) {
+    public static void blinker(AsciiPanel terminal, int x, int y) {
         if (ApplicationMain.count % 30 == 0) {
             blinker = !blinker;
         }
         if (blinker) {
-            terminal.write("/", x, y);
+            terminal.write("/", x, y, Color.white);
 
         }
     }
@@ -171,12 +171,6 @@ public class PlayScreen implements Screen {
                 case (KeyEvent.VK_ESCAPE):
                     input.clear();
                     return this;
-                case (KeyEvent.VK_V):
-                    describing++;
-                    if (describing > 2) {
-                        describing = 0;
-                    }
-                    return this;
                 case (KeyEvent.VK_Q):
                     subscreen = new PlanetScreen(galaxy, playerCiv);
                     return this;
@@ -202,6 +196,13 @@ public class PlayScreen implements Screen {
                     break;
                 case (KeyEvent.VK_D) :
                     moveCamera(1, 0);
+                    break;
+                case (KeyEvent.VK_V):
+                    if (galaxy.starHere(cameraX, cameraY)) {
+                        String string = galaxy.getStar(cameraX, cameraY).name;
+
+                        subscreen = new PlanetScreen(galaxy, playerCiv, string);
+                    }
                     break;
                 case (KeyEvent.VK_ENTER) :
                     advGame();

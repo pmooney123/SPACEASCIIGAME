@@ -4,6 +4,11 @@ public enum Tile {
     SPACE(' ', AsciiPanel.black), //(char)250
     BGSTAR('.', AsciiPanel.white), //(char)250
     BGSTAR2((char)250, AsciiPanel.white), //(char)250
+
+    PLANETSHALLOW('#', Color.white),
+    PLANETDEEP('#', Color.white),
+    PLANETPOLAR('#', new Color(236, 231, 231)),
+
     PLANETGREEN('#', new Color(16, 83, 19)),
     PLANETBLUE('#', new Color(8, 73, 104)),
     PLANETRED('#', new Color(168, 65, 65)),
@@ -12,7 +17,7 @@ public enum Tile {
     PLANETBROWN('#', new Color(71, 61, 43)),
     PLANETLIGHTBROWN('#', new Color(137, 118, 97)),
     PLANETDARKGREY('#', new Color(56, 56, 56)),
-    PLANETPOLAR('#', new Color(236, 231, 231)),
+
 
     IMAGESPACE(' ', new Color(33, 32, 32)),
 
