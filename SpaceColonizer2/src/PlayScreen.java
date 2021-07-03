@@ -40,7 +40,7 @@ public class PlayScreen implements Screen {
     public PlayScreen(){
         screenWidth = AsciiPanel.PORT_WIDTH;
         screenHeight = AsciiPanel.PORT_HEIGHT;
-        this.galaxy = new Galaxy(screenWidth, screenHeight, playerCiv);
+        this.galaxy = new Galaxy(screenWidth, screenHeight, playerCiv, civs);
         cameraX = galaxy.width /2;
         cameraY = galaxy.height /2;
         advGame();
@@ -83,7 +83,7 @@ public class PlayScreen implements Screen {
                     int wy = y2 + top; //top = space above screen view
                     if (galaxy.starHere(x2, y2)) {
                         Star star = galaxy.getStar(x2, y2);
-                        terminal.write(galaxy.glyph(wx, wy), x2, y2, star.politicalColor(), new Color(0,0,0,0));
+                        terminal.write(galaxy.glyph(wx, wy), x2, y2, star.color, new Color(0,0,0,0));
                     } else {
                         terminal.write(galaxy.glyph(wx, wy), x2, y2, galaxy.color(wx, wy), Color.black);
                     }
@@ -222,6 +222,9 @@ public class PlayScreen implements Screen {
         for (Planet planet : galaxy.allPlanets) {
             planet.advPopulation();
             planet.setProduction();
+        }
+        for (Star star : galaxy.allStars) {
+            star.mergeFleets();
         }
     }
     public static void blinker(AsciiPanel terminal, int x, int y) {

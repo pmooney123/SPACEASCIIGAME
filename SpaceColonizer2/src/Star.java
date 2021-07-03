@@ -9,7 +9,7 @@ public class Star {
     int x; int y;
 
 
-
+    Galaxy galaxy;
 
     ArrayList<Star> connectedStars = new ArrayList<>();
 
@@ -53,7 +53,30 @@ public class Star {
         }
         return notes;
     }
-
+    public void update() {
+        mergeFleets();
+    }
+    public void mergeFleets() {
+        for (int x = 0; x < orbitingFleets.size(); x++) {
+            for (int z = 0; z < orbitingFleets.size(); z++) {
+                    Fleet fleet = orbitingFleets.get(x);
+                    Fleet fleet2 = orbitingFleets.get(z);
+                    if (fleet != fleet2 && fleet.automerge && fleet2.automerge) {
+                        if (fleet.ownerCiv == fleet2.ownerCiv) {
+                            Fleet biggerFleet = fleet.total_power > fleet2.total_power ? fleet : fleet2;
+                            Fleet smallerFleet = fleet.total_power <= fleet2.total_power ? fleet : fleet2;
+                            biggerFleet.total_power += smallerFleet.total_power;
+                            System.out.println("bg fp" + biggerFleet.total_power);
+                            orbitingFleets.remove(smallerFleet);
+                            for (Civ civ : galaxy.civs) {
+                                civ.fleets.remove(smallerFleet);
+                            }
+                            z--;
+                        }
+                    }
+            }
+        }
+    }
     public Color politicalColor() {
         ArrayList<Color> colors = new ArrayList<>();
         for (Planet planet : planets) {
@@ -64,10 +87,11 @@ public class Star {
         if (colors.size() > 0) {
             return blend(colors);
         }
-        return Color.gray;
+        return color;
     }
-    public Star(int x, int y, String name, Tile tile) {
+    public Star(int x, int y, String name, Tile tile, Galaxy galaxy) {
         this.color = tile.color();
+        this.galaxy = galaxy;
         setNameArray();
         this.x = x;
         this.y = y;

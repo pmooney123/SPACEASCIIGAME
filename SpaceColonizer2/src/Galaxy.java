@@ -12,9 +12,11 @@ public class Galaxy {
     public ArrayList<Planet> allPlanets = new ArrayList<>();
     public ArrayList<Star> allStars = new ArrayList<>();
     ArrayList<String> potentialNames = new ArrayList<>();
+    ArrayList<Civ> civs;
 
-    public Galaxy(int width, int height, Civ player) {
+    public Galaxy(int width, int height, Civ player, ArrayList<Civ> civs) {
         this.width = width;
+        this.civs = civs;
         this.height = height;
         setNameArray();
         this.tileMap = makeWorld();
@@ -61,7 +63,7 @@ public class Galaxy {
             for (int y = 0; y < height; y++) {
                 if (tile(x, y).glyph() != Tile.SPACE.glyph() && tile(x, y).glyph() != Tile.BGSTAR2.glyph() && tile(x, y).glyph() != Tile.BGSTAR.glyph()){
                     System.out.println("added");
-                    Star star = new Star(x, y, "Star" + x + ":" + y, tile(x, y));
+                    Star star = new Star(x, y, "Star" + x + ":" + y, tile(x, y), this);
 
                     star.name = getName();
                     for (int z = 0; z < 3; z++) {

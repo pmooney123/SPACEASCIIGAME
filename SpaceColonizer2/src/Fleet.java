@@ -6,6 +6,7 @@ public class Fleet {
     int total_power = 0;
     Star currentStar = null;
     Civ ownerCiv;
+    boolean automerge = true; //does fleet merge with starfleets in same system?
 
     boolean hasDestination = false;
     int travel_time = 0;

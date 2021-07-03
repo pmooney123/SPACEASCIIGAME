@@ -87,6 +87,10 @@ public class FleetScreen extends SubScreen {
                 Fleet selectedFleet = fleets.get(left_slider);
 
                 for (Fleet fleet : fleets) {
+                    if (fleet.automerge) {
+                        terminal.write("M", xf - 3, yf, Color.pink);
+                    }
+
                     if (fleet != selectedFleet) {
                         terminal.write(fleet.name + " " + fleet.total_power + "*", xf, yf, player.color);
                         terminal.write("Location: " + fleet.currentStar.name, xp, yf, fleet.currentStar.politicalColor());
@@ -234,8 +238,8 @@ public class FleetScreen extends SubScreen {
                         break;
                     case (KeyEvent.VK_ENTER):
                         subscreen = new SelectDestinationScreen(galaxy, player, player.fleets.get(left_slider));
-                    case (KeyEvent.VK_SPACE):
-
+                    case (KeyEvent.VK_M):
+                        player.fleets.get(left_slider).automerge = !player.fleets.get(left_slider).automerge;
                         break;
                     case (KeyEvent.VK_V):
 
