@@ -6,11 +6,19 @@ public class Civ {
     Color color;
     Tech[] technologies = new Tech[5];
     ArrayList<Planet> controlledPlanets = new ArrayList<Planet>();
+    ArrayList<Fleet> fleets = new ArrayList<>();
+
     int tech_prog = 50;
 
     Tech researching = null;
+    public void newFleet(Star star, int power, Star target) {
+        Fleet fleet = new Fleet(this,star,power,target);
 
-    public Civ() {
+        fleets.add(fleet);
+        star.orbitingFleets.add(fleet);
+    }
+    public Civ(Color color) {
+        this.color = color;
         loadTechs();
     }
     public int techNumLocked() {

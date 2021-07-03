@@ -24,7 +24,12 @@ public class Galaxy {
 
     }
     public String getName() {
-        String string = potentialNames.get(random.nextInt(potentialNames.size() - 1));
+        String string = "";
+        if (potentialNames.size() > 1) {
+            string = potentialNames.get(random.nextInt(potentialNames.size() - 1));
+        } else  {
+            string = "STAR-" + random.nextInt(10) + random.nextInt(10) + random.nextInt(10);
+        }
         potentialNames.remove(string);
 
         return string;
@@ -32,11 +37,12 @@ public class Galaxy {
     }
     public void setNameArray() {
         String[] names = {
-                "Trappist", "Leo", "Ares", "Rigel", "Capricorn", "Aquarius", "Virgo", "Pisces", "Sagittarius",
+                "Trappist", "Leo", "Ares", "Rigel", "Capricorn", "Aquarius", "Virgo", "Pisces",
                 "Sirius", "Vega", "Deneb", "Pollux", "Antares", "Ursae", "Gemina", "Pegasi", "Bellatrix",
                 "Scorpio", "Capella", "Castor", "Centauri", "Satyr",
-                "Glob", "Rhea", "Patrick", "Hades", "Hercules", "Megara", "Apollo", "Persephone", "Cerberus",
+                "Glob", "Rhea", "Patrick", "Hades", "Hercules", "Megara", "Apollo", "Perseus", "Cerberus",
                 "Tau Ceti", "Theta-9", "Wolf", "Draconis", "Polaris", "Cassiopeia", "Procyon", "Hubble", "Heaven",
+                "Betelgeuse", "M-20", "X-99", "Zeta-9", "D-0087", "K9", "Covfefe", "Verizon",
         };
 
         potentialNames.addAll(Arrays.asList(names));
@@ -46,24 +52,60 @@ public class Galaxy {
     public void addStar(Star star) {
         allStars.add(star);
     }
+    public double distanceDis(int x, int y, int x2, int y2) {
+        return Math.sqrt((x2 - x)*(x2 - x) + (y2 * 1.5 - y * 1.5) * (y2 * 1.5 - y * 1.5));
+    }
 
     public void populateStars() {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 if (tile(x, y).glyph() != Tile.SPACE.glyph() && tile(x, y).glyph() != Tile.BGSTAR2.glyph() && tile(x, y).glyph() != Tile.BGSTAR.glyph()){
                     System.out.println("added");
-                    Star star = new Star(x, y, "Star" + x + ":" + y);
+                    Star star = new Star(x, y, "Star" + x + ":" + y, tile(x, y));
 
                     star.name = getName();
                     for (int z = 0; z < 3; z++) {
-                        Planet planet = new Planet(star.name);
+                        Planet planet = new Planet(star.name, star );
                         planet.name = star.getName();
                         star.addPlanet(planet);
                         allPlanets.add(planet);
                     }
-
                     addStar(star);
 
+                }
+            }
+        }
+        for (Star star : allStars) {
+            for (Star star2 : allStars) {
+                if (star != star2) {
+                    if (distanceDis(star.x, star.y, star2.x, star2.y) < 15) {
+                        if (star.connectedStars.size() < 4
+                                && star2.connectedStars.size() < 4) {
+                            if (!star2.connectedStars.contains(star)) {
+                                star.connectedStars.add(star2);
+                                star2.connectedStars.add(star);
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Star star : allStars) {
+            int distanceExpanded = 15;
+            while (star.connectedStars.size() == 0) {
+                distanceExpanded++;
+                for (Star star2 : allStars) {
+                    if (star != star2) {
+                        if (distanceDis(star.x, star.y, star2.x, star2.y) < distanceExpanded) {
+                            if (!star2.connectedStars.contains(star)) {
+                                star.connectedStars.add(star2);
+                                star2.connectedStars.add(star);
+
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -114,14 +156,14 @@ public class Galaxy {
             for (int y = 0; y < height; y++) {
 
                 if (NoStarsNear(tiles, x, y)) {
-                    tiles[x][y] = Math.random() < 0.96 ? //chance for a star
+                    tiles[x][y] = Math.random() < 0.92 ? //chance for a star
                             Tile.SPACE : Math.random() < 0.1 ?
                             Tile.NEUTRONSTAR : Math.random() < 0.1 ?
                             Tile.REDGIANT : Math.random() < 0.5 ?
                             Tile.YELLOWSTAR : Tile.WHITESTAR;
                     ;
                 } else {
-                    tiles[x][y] = tiles[x][y] = Math.random() < 0.99 ? //chance for a star near to another star
+                    tiles[x][y] = tiles[x][y] = Math.random() < 0.995 ? //chance for a star near to another star
                             Tile.SPACE : Math.random() < 0.1 ?
                             Tile.NEUTRONSTAR : Math.random() < 0.1 ?
                             Tile.REDGIANT : Math.random() < 0.5 ?
@@ -142,13 +184,13 @@ public class Galaxy {
         return tiles;
     }
     public boolean NoStarsNear(Tile[][] tiles, int x, int y) {
-        int distance = 4;
+        int distance = 3;
         for (int z = x - distance; z < x + distance; z++ ) {
             for (int j = y - distance; j < y + distance; j++) {
-                if (z > 0 && z < tiles.length && j > 0 && j < tiles[0].length) {
-                if (tiles[z][j] != Tile.SPACE && tiles[z][j] != null && tiles[z][j] != Tile.BOUNDS) {
-                    return false;
-                }
+                if (z >= 0 && z < tiles.length && j >= 0 && j < tiles[0].length) {
+                    if (tiles[z][j] != Tile.SPACE && tiles[z][j] != null && tiles[z][j] != Tile.BOUNDS) {
+                        return false;
+                    }
                 }
             }
         }
@@ -170,6 +212,11 @@ public class Galaxy {
     public Color color(int x, int y){
         return tile(x, y).color();
     } //get tile color
+
+    public Color bgcolor(int x, int y){
+        return tile(x, y).bgcolor();
+    } //get tile color
+
 
 
 }

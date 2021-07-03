@@ -4,9 +4,26 @@ public class Fleet {
     ArrayList<Ship> ships = new ArrayList<>();
     String name = "Fleet_Name";
     int total_power = 0;
+    Star currentStar = null;
+    Civ ownerCiv;
 
-    public Fleet() {
+    boolean hasDestination = false;
+    int travel_time = 0;
+    Star destinationStar;
 
+    public Fleet(Civ ownerCiv, Star currentStar, int power, Star starTarget) {
+        this.ownerCiv=  ownerCiv;
+        this.currentStar = currentStar;
+        total_power = power;
+        setDestination(starTarget);
+    }
+    public void setDestination(Star star) {
+        this.destinationStar = star;
+        hasDestination = true;
+    }
+    public void moveFleet(Star toStar) {
+        toStar.orbitingFleets.add(this);
+        currentStar.removeFleet(this);
     }
 
     public void addShip(Ship ship) {

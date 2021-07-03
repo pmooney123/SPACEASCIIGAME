@@ -14,7 +14,9 @@ public class PlanetScreen extends SubScreen {
     //to-do: rename planets, add moons,
     Civ player;
     String filterText = "";
+    String renameText = "";
     boolean typing = false;
+    boolean typingR = false;
     public boolean blinker = false;
     String sortingText = "Random";
     boolean show_colonized = true;
@@ -181,7 +183,7 @@ public class PlanetScreen extends SubScreen {
         int y = 7;
         int index = 0;
 
-        terminal.write("COLONIZED: (-SPACEBAR-)", 2, 5, Color.white);
+        terminal.write("COLONIZED: (-SPACEBAR-)", 2, 5, Color.cyan);
         terminal.write("Sorting: " + sortingText + " -V-", 2, 6, Color.white);
 
         for (Planet planet : colonizedPlanets) {
@@ -198,7 +200,21 @@ public class PlanetScreen extends SubScreen {
                 }
 
                 terminal.write(planet.name, x + 1, y++, planet.habColor());
+                if (typingR && colonizedPlanets.indexOf(planet) == left_slider) {
+                    if (ApplicationMain.count % 10 == 0) {
+                        blinker = !blinker;
+                    }
+                    if (blinker) {
+                            int xb = x + 1 + renameText.length();
+                            int yb = y - 1;
+                            blinker(terminal, xb, yb);
+                    }
+                    y--;
+                    terminal.write(renameText, x + 1, y++, Color.white);
+                }
 
+
+                //renaming
                 if (colonizedPlanets.indexOf(planet) == left_slider) {
                     terminal.write(">", x + planet.name.length() + 1, y - 1, Color.cyan);
                 }
@@ -327,7 +343,7 @@ public class PlanetScreen extends SubScreen {
     public void printColonizable(AsciiPanel terminal) {
         int y = 7;
         int index = 0;
-        terminal.write("COLONIZABLE: (-SPACEBAR-)", 2, 5, Color.white);
+        terminal.write("COLONIZABLE: (-SPACEBAR-)", 2, 5, Color.green);
         terminal.write("Sorting: " + sortingText + " -V-", 2, 6, Color.white);
 
 
@@ -392,7 +408,7 @@ public class PlanetScreen extends SubScreen {
                 int yb = 4;
                 blinker(terminal, xb, yb);
             }
-        }
+        } //filtering
 
 
         if (show_colonized) {
@@ -451,11 +467,42 @@ public class PlanetScreen extends SubScreen {
                     filterText = filterText.concat(" ");
                     break;
                 default:
-                    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ -+=-';:\"".contains((key.getKeyChar() + "").toUpperCase())) {
+                    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ -+=-';:\"1234567890".contains((key.getKeyChar() + "").toUpperCase())) {
                         filterText = filterText.concat(key.getKeyChar() + "");
                     }
             }
-        } else {
+        } else if (typingR) {
+            switch (key.getKeyCode()) {
+                case (KeyEvent.VK_ESCAPE):
+                    renameText = "";
+                    typingR = false;
+                    break;
+                case (KeyEvent.VK_BACK_SPACE):
+                    if (renameText.length() > 0) {
+                        renameText = renameText.substring(0, renameText.length()-1);
+                    } else {
+                        typing = false;
+                    }
+                    break;
+                case (KeyEvent.VK_ENTER):
+                    if (renameText.length() > 0) {
+                        colonizedPlanets.get(left_slider).name = renameText;
+                    }
+                    renameText = "";
+                    typingR = false;
+                    break;
+
+                case (KeyEvent.VK_SPACE):
+                    renameText = renameText.concat(" ");
+                    break;
+                default:
+                    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ -+=-';:\"1234567890".contains((key.getKeyChar() + "").toUpperCase())) {
+                        renameText = renameText.concat(key.getKeyChar() + "");
+                    }
+                    break;
+
+            }
+        } else
             switch (key.getKeyCode()) {
                 case (KeyEvent.VK_UP):
                     right_slider(-1);
@@ -469,7 +516,11 @@ public class PlanetScreen extends SubScreen {
                 case (KeyEvent.VK_DOWN):
                     right_slider(1);
                     break;
-
+                case (KeyEvent.VK_R):
+                    if (show_colonized) {
+                        typingR = true;
+                    }
+                    break;
                 case (KeyEvent.VK_F):
                     typing = true;
                     break;
@@ -511,9 +562,9 @@ public class PlanetScreen extends SubScreen {
                     sortColonies();
                     break;
             }
-        }
         return this;
     }
+
 
     public void printColonizedImage(AsciiPanel terminal) {
         AsciiImage asciiImage = null;

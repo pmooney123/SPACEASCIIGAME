@@ -11,14 +11,15 @@ public class Planet {
     Color colorString;
     Color colorShallow;
     AsciiImage asciiImage;
+    Star star;
 
     int size;
     int resources;
 
-    public Planet(String name) {
+    public Planet(String name, Star star) {
         this.name = "Default_planet";
         colorString = Color.red;
-
+        this.star = star;
         resources = 10;
         size = random.nextInt(4) + 4;
         this.name = name;
@@ -95,9 +96,15 @@ public class Planet {
         owner = null;
         colonized = false;
     }
-
+    public Color getOwnerColor() {
+        if (colonized) {
+            return owner.color;
+        } else {
+            return Color.white;
+        }
+    }
     public String getPopString() {
-        if (population > 1000) {
+        if (population >= 1000) {
             double value = population / 1000;
             return String.valueOf(Math.round(value * 10) / 10.0) + "b";
         } else {
@@ -107,7 +114,7 @@ public class Planet {
     }
 
     public double getMaxPop() {
-        return size * 1000 * habitability / 100.0;
+        return size * 1000 * (habitability / 100.0) * (habitability / 100.0);
     }
 
     public void setProduction() {
@@ -135,8 +142,10 @@ public class Planet {
         double popgrowth = (population / 4.0) * happiness / 100.0;
 
          */
-        population += popgrowth;
-        lastPopGrowth = popgrowth;
+        if (colonized) {
+            population += popgrowth;
+            lastPopGrowth = popgrowth;
+        }
     }
 
     public void calculateTotal() {

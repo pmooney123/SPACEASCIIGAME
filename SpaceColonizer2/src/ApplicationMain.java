@@ -30,6 +30,7 @@ public class ApplicationMain extends JFrame implements KeyListener {
     }
     public void run() {
         while (true) {
+
             count++;
             long startTime = System.nanoTime();
 
