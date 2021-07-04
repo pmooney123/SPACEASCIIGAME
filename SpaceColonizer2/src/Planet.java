@@ -74,7 +74,10 @@ public class Planet {
 
     }
 
+    public void buildShips() {
+        owner.newFleet(star, (int) shipSpendingActual(), null);
 
+    }
 
 
     public void setHappiness() {

@@ -66,7 +66,7 @@ public class Star {
                             Fleet biggerFleet = fleet.total_power > fleet2.total_power ? fleet : fleet2;
                             Fleet smallerFleet = fleet.total_power <= fleet2.total_power ? fleet : fleet2;
                             biggerFleet.total_power += smallerFleet.total_power;
-                            System.out.println("bg fp" + biggerFleet.total_power);
+                            
                             orbitingFleets.remove(smallerFleet);
                             for (Civ civ : galaxy.civs) {
                                 civ.fleets.remove(smallerFleet);
@@ -125,7 +125,15 @@ public class Star {
     public void addPlanet(Planet planet) {
         planets.add(planet);
     }
-
+    public ArrayList<Star> getConnectedStars() {
+        ArrayList<Star> connectedStars = new ArrayList<>();
+        for (Star star : galaxy.allStars) {
+            if (star.connectedStars.contains(this) || this.connectedStars.contains(star)) {
+                connectedStars.add(star);
+            }
+        }
+        return  connectedStars;
+    }
     public String getName() {
         String string = potentialNames.get(0);
         potentialNames.remove(0);

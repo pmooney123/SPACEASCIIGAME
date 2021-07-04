@@ -21,9 +21,9 @@ public enum Tile {
 
     IMAGESPACE(' ', new Color(33, 32, 32), new Color(0,0,0,0)),
 
-    REDGIANT('0', Color.red, Color.black),
-    YELLOWSTAR('o',new Color(255, 213, 0), Color.black),
-    NEUTRONSTAR('*', Color.cyan, Color.black),
+    REDGIANT('0', new Color(255, 0, 0), Color.black),
+    YELLOWSTAR('o',new Color(255, 222, 0), Color.black),
+    NEUTRONSTAR('*', new Color(0, 237, 255), Color.black),
     WHITESTAR('o',new Color(255, 255, 255),Color.black),
 
 

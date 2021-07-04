@@ -7,11 +7,6 @@ import java.util.Collections;
 public class SelectDestinationScreen extends SubScreen {
     Galaxy galaxy;
 
-    //this screen will show detail planet info and allow allocation of planet resources on a turn by turn basis
-
-    //a list on the left with every planet, then a secondary menu scrollable with all options. Left/right will change the allocation
-    //display percentage of resources from the bar for each resource
-    //to-do: rename planets, add moons,
     Civ player;
     String filterText = "";
 
@@ -23,15 +18,19 @@ public class SelectDestinationScreen extends SubScreen {
 
     public int left_slider = 0; //how far into arraylist
 
-    public ArrayList<Planet> allPlanets = new ArrayList<>();
-    public void filterSort(ArrayList<Planet> array) {
+    public ArrayList<Star> allPlanets = new ArrayList<>();
+    public void filterSort(ArrayList<Star> array) {
 
-        array.sort(new FilterComparator(filterText));
+        array.sort(new StarFilterComparator(filterText));
 
     }
     public SelectDestinationScreen(Galaxy world, Civ player, Fleet fleet) {
         this.galaxy = world;
-        this.allPlanets = new ArrayList<>(galaxy.allPlanets);
+        //ArrayList<Star> connected = new ArrayList<>(fleet.currentStar.getConnectedStars());
+        ArrayList<Star> connected = new ArrayList<>(galaxy.allStars);
+
+        allPlanets = connected;
+
         this.ls_max = allPlanets.size() - 1;
         this.player = player;
         adjustLS();
@@ -75,22 +74,26 @@ public class SelectDestinationScreen extends SubScreen {
         terminal.write("Select Destination: ", 2, 5, Color.green);
 
 
-        for (Planet planet : allPlanets) {
+        for (Star star : allPlanets) {
 
             index++;
             if (y >= AsciiPanel.SCREEN_HEIGHT) {
-                continue;
+                break;
             }
             int x = 1;
 
-            if (allPlanets.indexOf(planet) == left_slider) {
+            if (allPlanets.indexOf(star) == left_slider) {
                 terminal.write("<", x, y, Color.cyan);
             }
 
-            terminal.write(planet.name, x + 1, y++, planet.habColor());
+            terminal.write(star.name, x + 1, y, star.color);
 
-            if (allPlanets.indexOf(planet) == left_slider) {
-                terminal.write(">", x + planet.name.length() + 1, y - 1, Color.cyan);
+            int distance = (int) fleet.distanceTravel(fleet.currentStar.x, fleet.currentStar.y, star.x, star.y);
+            //System.out.println("distance" + distance);
+            terminal.write("Distance: " + distance, x + 20, y++, Color.pink);
+
+            if (allPlanets.indexOf(star) == left_slider) {
+                terminal.write(">", x + star.name.length() + 1, y - 1, Color.cyan);
             }
         }
     }
@@ -167,7 +170,9 @@ public class SelectDestinationScreen extends SubScreen {
                 case (KeyEvent.VK_ESCAPE):
                     return null;
                 case (KeyEvent.VK_ENTER):
-                    fleet.setDestination(allPlanets.get(left_slider).star);
+                    if (fleet.currentStar != null) {
+                        fleet.setDestination(allPlanets.get(left_slider));
+                    }
                     return null;
             }
         }
@@ -176,11 +181,11 @@ public class SelectDestinationScreen extends SubScreen {
 
     public void printNotColonizedImage(AsciiPanel terminal) {
         AsciiImage asciiImage = null;
-        asciiImage = allPlanets.get(left_slider).asciiImage;
+        //asciiImage = allPlanets.get(left_slider).asciiImage;
 
         int xcorner = 28;
         int ycorner = 18;
-        asciiImage.displayThis(terminal, xcorner, ycorner);
+        //asciiImage.displayThis(terminal, xcorner, ycorner);
     }
 
 

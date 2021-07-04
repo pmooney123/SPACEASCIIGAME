@@ -96,6 +96,8 @@ public class FleetScreen extends SubScreen {
                         terminal.write("Location: " + fleet.currentStar.name, xp, yf, fleet.currentStar.politicalColor());
                         if (fleet.hasDestination) {
                             terminal.write("DESTINATION: " + fleet.destinationStar.name, xp + 20, yf, Color.cyan);
+                            terminal.write("Progress: " + fleet.interProgress + "/" + fleet.distanceNeeded, xp + 40, yf, Color.pink);
+
                         }
                         yf++;
 
@@ -108,8 +110,9 @@ public class FleetScreen extends SubScreen {
 
                         if (fleet.hasDestination) {
                             terminal.write("DESTINATION: " + fleet.destinationStar.name, xp + 20, yf, Color.cyan);
-                        }
-                        yf++;
+                            terminal.write("Progress: " + fleet.interProgress + "/" + fleet.distanceNeeded, xp + 40, yf, Color.pink);
+
+                        }                        yf++;
 
                         if (typingR) {
                             if (ApplicationMain.count % 10 == 0) {
@@ -237,7 +240,10 @@ public class FleetScreen extends SubScreen {
 
                         break;
                     case (KeyEvent.VK_ENTER):
-                        subscreen = new SelectDestinationScreen(galaxy, player, player.fleets.get(left_slider));
+                        if (player.fleets.size() > 0) {
+                            subscreen = new SelectDestinationScreen(galaxy, player, player.fleets.get(left_slider));
+                        }
+                        break;
                     case (KeyEvent.VK_M):
                         player.fleets.get(left_slider).automerge = !player.fleets.get(left_slider).automerge;
                         break;

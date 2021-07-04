@@ -11,6 +11,13 @@ public class Civ {
     int tech_prog = 50;
 
     Tech researching = null;
+    public void moveFleets() {
+        for (Fleet fleet : fleets) {
+            if (fleet.hasDestination) {
+                fleet.move();
+            }
+        }
+    }
     public void newFleet(Star star, int power, Star target) {
         Fleet fleet = new Fleet(this,star,power,target);
 

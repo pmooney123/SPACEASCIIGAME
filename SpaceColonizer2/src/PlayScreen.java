@@ -21,7 +21,7 @@ public class PlayScreen implements Screen {
     public Galaxy galaxy;
     private Screen subscreen;
     public boolean namesShown = false;
-    public boolean powerShown = false;
+    public boolean powerShown = true;
     public boolean linesShown = false;
     public int year = random.nextInt(250) + 2000;
 
@@ -128,9 +128,6 @@ public class PlayScreen implements Screen {
                         sy ++;
                     }
                     for (Note note : star.fleetStats()) {
-
-
-
                         for (int x2 = 0; x2 < note.string.length(); x2++) {
                             if (!galaxy.starHere(sx + x2 + 1, sy - 1)) {
 
@@ -167,7 +164,8 @@ public class PlayScreen implements Screen {
                 x = AsciiPanel.PORT_WIDTH + 2;
                 y = 5;
                 terminal.write("STAR: " + star.name, x, y++);
-                for (Fleet fleet : star.orbitingFleets) {
+                ArrayList<Fleet> orbitingF = star.orbitingFleets;
+                for (Fleet fleet : orbitingF) {
                     terminal.write("Fleet: " + fleet.name + " " + fleet.total_power + "*", x, y++);
                 }
             }
@@ -222,9 +220,17 @@ public class PlayScreen implements Screen {
         for (Planet planet : galaxy.allPlanets) {
             planet.advPopulation();
             planet.setProduction();
+            if (planet.owner != null) {
+                planet.buildShips();
+            }
         }
         for (Star star : galaxy.allStars) {
             star.mergeFleets();
+        }
+        for (Civ civ : galaxy.civs) {
+            civ.fleets.sort(new FleetStrengthComparator());
+            civ.moveFleets();
+
         }
     }
     public static void blinker(AsciiPanel terminal, int x, int y) {
