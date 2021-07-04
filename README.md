@@ -36,6 +36,13 @@ Population: grows logistically based on maximum carrying capacity of planet. K i
 V -> sort arrays (habitability, alphabetically, production)
 to add: population, distance, cost, bonuses.
 
+4.0 -> ship movement, warp, 
+5.0 -> colony establishment. combat. imrpove colony manager w/ sorting, add distance sorting to fleet movement screen, 
+6.0 -> basic combat and fleet tech, enemies
+7.0 -> technology fleshed out, terraforming
+8.0 -> politics/race/diplomacy dog of war/ exploration
+
+  
 
 TO ADD:
    fleet management -> desired ratios, upgrading, repairing, combat
