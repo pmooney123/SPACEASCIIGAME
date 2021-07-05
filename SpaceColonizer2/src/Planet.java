@@ -52,18 +52,18 @@ public class Planet {
     boolean colonized = false;
     Civ owner = null;
 
-    double population = 0.5;
+    double population = 0;
     double factories = 0;
 
     int production = (int) (Math.random() * 100);
     int happiness = 50;
     double lastPopGrowth = 0;
 
-    int defenseSpending = 20;
-    int industrySpending = 40;
-    int shipSpending = 20;
-    int researchSpending = 20;
-    int terraSpending = 0;
+    int defenseSpending = 10;
+    int industrySpending = 10;
+    int shipSpending = 10;
+    int researchSpending = 10;
+    int terraSpending = 10;
     public int totalSpending = 0;
 
 
@@ -73,8 +73,85 @@ public class Planet {
     public void setPolarity() {
 
     }
+    public void manageHab() {
+        switch (random.nextInt(5)) {
+            case (0):
+                if (temperature > 10) {
+                    temperature -= terraSpendingActual();
+                    if (temperature < 10) {
+                        temperature = 10;
+                    }
+                } else if (temperature < 10) {
+                    temperature += terraSpendingActual();
+                    if (temperature > 10) {
+                        temperature = 10;
+                    }
+                }
+                break;
+            case (1):
+                if (wetness < 12) {
+                    wetness += terraSpendingActual()/2;
+                    if (wetness > 12) {
+                        wetness = 12;
+                    }
+                }
+                break;
+            case (2):
+                if (radiation > 0) {
+                    radiation -= terraSpendingActual();
+                    if (radiation < 0) {
+                        radiation = 0;
+                    }
+                }
+                break;
+            case (3):
+                if (soilrichness < 20) {
+                    soilrichness += terraSpendingActual();
+                    if (soilrichness > 20) {
+                        soilrichness = 20;
+                    }
+                }
+                break;
+            case (4):
+                if (breathability < 20) {
+                    breathability += terraSpendingActual();
+                    if (breathability > 20) {
+                        breathability = 20;
+                    }
+                }
+                break;
+        }
+        setHabitability();
+        setHappiness();
+
+        if (wetness > 10) {
+            if (colorDeep.getBlue() < 150) {
+                colorDeep = new Color(colorDeep.getRed(), colorDeep.getGreen(), 150);
+            }
+        }
+        if (soilrichness == 20) {
+            colorShallow = Color.green;
+        }
+        if (temperature == 10 && polarity > 2) {
+            wetness += polarity - 2;
+            polarity = 2;
+        }
+
+        asciiImage.colorShallow = colorShallow;
+        asciiImage.colorDeep = colorDeep;
+        asciiImage.polarity = polarity;
+    }
+    public void buildShips() {
+        owner.newFleet(star, (int) shipSpendingActual(), null);
 
 
+        factories += industrySpendingActual() / 10.0;
+        if (factories > getMaxFactories()) {
+            factories = getMaxFactories();
+        }
+
+
+    }
 
 
     public void setHappiness() {
@@ -85,6 +162,8 @@ public class Planet {
     public void setHabitability() {
         habitability = 2 * Math.min(wetness, 10) + breathability + (int) (20 - (2 * (Math.abs(10.0 - temperature)))) + (20 - radiation) + soilrichness;
         setHappiness();
+
+
     }
 
     public void setOwner(Civ newOwner) {
@@ -109,16 +188,23 @@ public class Planet {
             return String.valueOf(Math.round(value * 10) / 10.0) + "b";
         } else {
 
-            return String.valueOf(Math.round(population * 10) / 10.0) + "m";
+            return String.valueOf(Math.round(population)) +
+                    (char) 1;
         }
     }
 
     public double getMaxPop() {
-        return size * 1000 * (habitability / 100.0) * (habitability / 100.0);
+        //
+        // return size * 1000 * (habitability / 100.0) * (habitability / 100.0);
+        return 10 * size * habitability/100.0 * habitability/100.0;
+    }
+    public double getMaxFactories() {
+        return getMaxPop();
     }
 
     public void setProduction() {
         //        double P = Math.log(population * 1000000) / Math.log(1.05);
+        /*
         double Pexp = Math.log10(population * 1000000);
         double P = Math.pow(1.9195, Pexp);
         P -= 20;
@@ -126,7 +212,9 @@ public class Planet {
             P = 10;
         }
 
-        production = (int) Math.round(P);
+         */
+
+        production = Math.round(Math.min(Math.round(population), Math.round(factories)));
 
         //log(population, 1.08) - 100
 
@@ -136,7 +224,7 @@ public class Planet {
     public void advPopulation() {
         double P = population;
         double K = getMaxPop();
-        double R = 0.5 * happiness / 100.0;
+        double R = 0.25 * happiness / 100.0;
         double popgrowth = R * P * (1 - (P / K));
         /*
         double popgrowth = (population / 4.0) * happiness / 100.0;
@@ -358,7 +446,7 @@ public class Planet {
     }
     public Color waterColor() {
         int value = wetness;
-        if (value >= 0 && value <= 5) {
+        if (value <= 5) {
             return new Color(255, 200, 0);
         } else if (value > 5 && value <= 10) {
             return new Color(255, 140, 0);
@@ -366,22 +454,22 @@ public class Planet {
             return new Color(15, 118, 80, 107);
         } else         if (value > 15 && value < 18) {
             return new Color(3, 106, 154);
-        } else         if (value >= 18 && value <= 20) {
+        } else         if (value >= 18) {
             return new Color(0, 55, 255);
         }
         return Color.black;
     }
     public String waterString() {
         int value = wetness;
-        if (value >= 0 && value <= 5) {
+        if (value <= 5) {
             return "None";
         } else if (value > 5 && value <= 10) {
-            return "Some Moisture";
-        } else         if (value > 10 && value <= 15) {
             return "Lakes";
-        } else         if (value > 15 && value < 18) {
+        } else         if (value > 10 && value <= 15) {
             return "Oceans";
-        } else         if (value >= 18 && value <= 20) {
+        } else         if (value > 15 && value < 18) {
+            return "Large Oceans";
+        } else         if (value >= 18) {
             return "Superoceanic";
         }
         return  "Error";

@@ -38,6 +38,7 @@ public class AsciiPanel extends JPanel {
      * The color black (pure black).
      */
     public static Color black = new Color(0, 0, 0);
+    public static Color purple = new Color(102, 0, 255);
 
     /**
      * The color red.

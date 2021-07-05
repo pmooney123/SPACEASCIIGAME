@@ -41,13 +41,22 @@ public class Star {
         ArrayList<Note> notes = new ArrayList<>();
         for (Civ player : playersHere()) {
             int total_power = 0;
+            int total_pop = 0;
             Color color = player.color;
             for (Fleet fleet : orbitingFleets) {
                 if (fleet.ownerCiv == player) {
                     total_power += fleet.total_power;
+                    if (fleet.colonyShip) {
+                        total_pop += fleet.population;
+                    }
                 }
             }
-            notes.add(new Note(total_power +"*", color));
+            if (total_power >= 1) {
+                notes.add(new Note(total_power + "*", color));
+            }
+            if (total_pop > 0) {
+                notes.add(new Note(total_pop +""+ (char)1, color));
+            }
 
 
         }
@@ -66,7 +75,7 @@ public class Star {
                             Fleet biggerFleet = fleet.total_power > fleet2.total_power ? fleet : fleet2;
                             Fleet smallerFleet = fleet.total_power <= fleet2.total_power ? fleet : fleet2;
                             biggerFleet.total_power += smallerFleet.total_power;
-                            System.out.println("bg fp" + biggerFleet.total_power);
+
                             orbitingFleets.remove(smallerFleet);
                             for (Civ civ : galaxy.civs) {
                                 civ.fleets.remove(smallerFleet);
@@ -87,7 +96,7 @@ public class Star {
         if (colors.size() > 0) {
             return blend(colors);
         }
-        return color;
+        return Color.gray;
     }
     public Star(int x, int y, String name, Tile tile, Galaxy galaxy) {
         this.color = tile.color();
@@ -125,7 +134,15 @@ public class Star {
     public void addPlanet(Planet planet) {
         planets.add(planet);
     }
-
+    public ArrayList<Star> getConnectedStars() {
+        ArrayList<Star> connectedStars = new ArrayList<>();
+        for (Star star : galaxy.allStars) {
+            if (star.connectedStars.contains(this) || this.connectedStars.contains(star)) {
+                connectedStars.add(star);
+            }
+        }
+        return  connectedStars;
+    }
     public String getName() {
         String string = potentialNames.get(0);
         potentialNames.remove(0);

@@ -22,8 +22,20 @@ public class Galaxy {
         this.tileMap = makeWorld();
         populateStars();
         allPlanets.get(0).setOwner(player);
+        allPlanets.get(0).population = 10;
+        allPlanets.get(0).factories = 10;
+        allPlanets.get(0).radiation = 0;
+        allPlanets.get(0).breathability = 20;
+        allPlanets.get(0).wetness = 15;
+        allPlanets.get(0).soilrichness = 20;
+        allPlanets.get(0).temperature = random.nextInt(5) + 8;
 
 
+    }
+    public void removeFleet(Fleet fleet) {
+        for (Star star : allStars) {
+            star.orbitingFleets.remove(fleet);
+        }
     }
     public String getName() {
         String string = "";
@@ -66,7 +78,8 @@ public class Galaxy {
                     Star star = new Star(x, y, "Star" + x + ":" + y, tile(x, y), this);
 
                     star.name = getName();
-                    for (int z = 0; z < 3; z++) {
+                    int num_stars = random.nextInt(4);
+                    for (int z = 0; z < num_stars; z++) {
                         Planet planet = new Planet(star.name, star );
                         planet.name = star.getName();
                         star.addPlanet(planet);

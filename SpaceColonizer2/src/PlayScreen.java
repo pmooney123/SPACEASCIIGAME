@@ -21,15 +21,15 @@ public class PlayScreen implements Screen {
     public Galaxy galaxy;
     private Screen subscreen;
     public boolean namesShown = false;
-    public boolean powerShown = false;
+    public boolean powerShown = true;
     public boolean linesShown = false;
     public int year = random.nextInt(250) + 2000;
 
     public int cameraX = 0; public int cameraY = 0;
 
     public ArrayList<Civ> civs = new ArrayList<Civ>();
-    public Civ playerCiv = new Civ(Color.green);
-    public Civ enemyCiv = new Civ(Color.orange);
+    public Civ playerCiv;
+    public Civ enemyCiv;
     public ArrayList<SubMenu> subMenus = new ArrayList<>();
 
     public static boolean HELP = true;
@@ -40,16 +40,18 @@ public class PlayScreen implements Screen {
     public PlayScreen(){
         screenWidth = AsciiPanel.PORT_WIDTH;
         screenHeight = AsciiPanel.PORT_HEIGHT;
+        this.playerCiv = new Civ(Color.green, null, "Player");
+        this.enemyCiv = new Civ(Color.orange, null, "enemy");
         this.galaxy = new Galaxy(screenWidth, screenHeight, playerCiv, civs);
+        playerCiv.world = galaxy;
+        enemyCiv.world = galaxy;
         cameraX = galaxy.width /2;
         cameraY = galaxy.height /2;
         advGame();
         //this.factory = new Factory();
+
         civs.add(playerCiv);
         civs.add(enemyCiv);
-        for (Star star : galaxy.allStars) {
-
-        }
 
     }
 
@@ -83,7 +85,7 @@ public class PlayScreen implements Screen {
                     int wy = y2 + top; //top = space above screen view
                     if (galaxy.starHere(x2, y2)) {
                         Star star = galaxy.getStar(x2, y2);
-                        terminal.write(galaxy.glyph(wx, wy), x2, y2, star.color, new Color(0,0,0,0));
+                        terminal.write(galaxy.glyph(wx, wy), x2, y2, star.politicalColor(), new Color(0,0,0,0));
                     } else {
                         terminal.write(galaxy.glyph(wx, wy), x2, y2, galaxy.color(wx, wy), Color.black);
                     }
@@ -128,9 +130,6 @@ public class PlayScreen implements Screen {
                         sy ++;
                     }
                     for (Note note : star.fleetStats()) {
-
-
-
                         for (int x2 = 0; x2 < note.string.length(); x2++) {
                             if (!galaxy.starHere(sx + x2 + 1, sy - 1)) {
 
@@ -167,7 +166,8 @@ public class PlayScreen implements Screen {
                 x = AsciiPanel.PORT_WIDTH + 2;
                 y = 5;
                 terminal.write("STAR: " + star.name, x, y++);
-                for (Fleet fleet : star.orbitingFleets) {
+                ArrayList<Fleet> orbitingF = star.orbitingFleets;
+                for (Fleet fleet : orbitingF) {
                     terminal.write("Fleet: " + fleet.name + " " + fleet.total_power + "*", x, y++);
                 }
             }
@@ -196,9 +196,10 @@ public class PlayScreen implements Screen {
                     xgap3 = string.length();
                 }
             }
+            y = 15;
             for (Planet planet: galaxy.colonizedBy(playerCiv)) {
                 x = 80;
-                y = 15;
+
                 String string = planet.name + ": ";
                 terminal.write( string, x, y, Color.white);
                 x += xgap1;
@@ -211,7 +212,6 @@ public class PlayScreen implements Screen {
                 terminal.write( string + " ", x, y, Color.orange);
                 x += xgap3;
                 string = planet.happiness + "% ";
-
                 terminal.write( string + " ", x, y++, planet.habColor());
             }
 
@@ -219,12 +219,59 @@ public class PlayScreen implements Screen {
     }
     public void advGame() {
         year += 10;
+        for (Civ civ : galaxy.civs) {
+            for (Fleet fleet : civ.fleets) {
+                System.out.println();
+                if (fleet.colonyShip) {
+                    if (fleet.currentStar == fleet.destinationPlanet.star) {
+                        if (fleet.destinationPlanet.owner == null || fleet.destinationPlanet.owner == civ) {
+                            fleet.destinationPlanet.setOwner(civ);
+                            System.out.println("owner: " + fleet.destinationPlanet.owner.name);
+                            fleet.destinationPlanet.population += fleet.population;
+                            fleet.destinationPlanet.factories += fleet.population;
+                            fleet.population = 0;
+
+                            civ.controlledPlanets();
+
+                        }
+                    }
+                }
+            }
+            for (int x = 0; x < civ.fleets.size(); x++) {
+                if (civ.fleets.get(x).colonyShip && civ.fleets.get(x).population < 1) {
+
+
+                    galaxy.removeFleet(civ.fleets.get(x));
+                    civ.fleets.remove(x);
+                    x--;
+                }
+            }
+        }
         for (Planet planet : galaxy.allPlanets) {
             planet.advPopulation();
             planet.setProduction();
-        }
+            if (planet.owner != null) {
+                planet.buildShips();
+                planet.manageHab();
+            } else {
+                planet.population = 0;
+            }
+        } //planetary production and growth
         for (Star star : galaxy.allStars) {
             star.mergeFleets();
+        } //merge fleets
+        for (Civ civ : galaxy.civs) {
+            civ.fleets.sort(new FleetStrengthComparator());
+            civ.moveFleets();
+        } //move fleets
+        for (Star star : galaxy.allStars) {
+            for (Fleet fleet : star.orbitingFleets) {
+                for (Fleet fleet2 : star.orbitingFleets) {
+                    if (fleet != fleet2) {
+                        //COMBAT
+                    }
+                }
+            }
         }
     }
     public static void blinker(AsciiPanel terminal, int x, int y) {

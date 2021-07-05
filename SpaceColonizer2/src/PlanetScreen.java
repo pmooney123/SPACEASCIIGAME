@@ -63,7 +63,7 @@ public class PlanetScreen extends SubScreen {
     //defense, technology, fleet, industry, comfort,
     public int ls_max;
     public int rs_max = 4;
-
+    Screen subscreen = null;
 
     public void right_slider(int x) {
 
@@ -199,7 +199,7 @@ public class PlanetScreen extends SubScreen {
                     terminal.write("<", x, y, Color.cyan);
                 }
 
-                terminal.write(planet.name, x + 1, y++, planet.habColor());
+                terminal.write(planet.name, x + 1, y++, Color.white);
                 if (typingR && colonizedPlanets.indexOf(planet) == left_slider) {
                     if (ApplicationMain.count % 10 == 0) {
                         blinker = !blinker;
@@ -234,6 +234,7 @@ public class PlanetScreen extends SubScreen {
         }
         y = 6;
         if (colonizedPlanets.size() > 0) {
+
             Planet planet = colonizedPlanets.get(left_slider);
 
             terminal.write(planet.industrySpending + "%", 45, y, Color.cyan);
@@ -265,6 +266,9 @@ public class PlanetScreen extends SubScreen {
             y += 6;
             terminal.write("PRODUCTION: ", 25, y, Color.orange);
             terminal.write(planet.production + "*", 45, y++, Color.orange);
+
+            terminal.write("Factories: ", 25, y, Color.pink);
+            terminal.write(""+(int)planet.factories, 45, y++, Color.pink);
 
             terminal.write("POPULATION: ", 25, y, Color.green);
             terminal.write(planet.getPopString(), 45, y++, Color.green);
@@ -392,37 +396,39 @@ public class PlanetScreen extends SubScreen {
         }
     }
     public void displayOutput(AsciiPanel terminal) {
-
-        adjustLS();
-
-        terminal.write("-ESC- to close", 1, 2);
-        terminal.write("This is the planet menu.", 1 ,3);
-
-        terminal.write("-'F'- FILTER: " + filterText, 1, 4, Color.white);
-        if (typing) {
-            if (ApplicationMain.count % 10 == 0) {
-                blinker = !blinker;
-            }
-            if (blinker) {
-                int xb = 1 + ("-'F'- FILTER: " + filterText).length();
-                int yb = 4;
-                blinker(terminal, xb, yb);
-            }
-        } //filtering
-
-
-        if (show_colonized) {
-            printColonized(terminal);
+        if (subscreen != null ) {
+            subscreen.displayOutput(terminal);
         } else {
-            printColonizable(terminal);
-        }
+            adjustLS();
 
-        if (colonizedPlanets.size() > 0 && show_colonized) {
-            printColonizedImage(terminal);
-        } else if (!show_colonized && notColPlanets.size() > 0){
-            printNotColonizedImage(terminal);
-        }
+            terminal.write("-ESC- to close", 1, 2);
+            terminal.write("This is the planet menu.", 1, 3);
 
+            terminal.write("-'F'- FILTER: " + filterText, 1, 4, Color.white);
+            if (typing) {
+                if (ApplicationMain.count % 10 == 0) {
+                    blinker = !blinker;
+                }
+                if (blinker) {
+                    int xb = 1 + ("-'F'- FILTER: " + filterText).length();
+                    int yb = 4;
+                    blinker(terminal, xb, yb);
+                }
+            } //filtering
+
+
+            if (show_colonized) {
+                printColonized(terminal);
+            } else {
+                printColonizable(terminal);
+            }
+
+            if (colonizedPlanets.size() > 0 && show_colonized) {
+                printColonizedImage(terminal);
+            } else if (!show_colonized && notColPlanets.size() > 0) {
+                printNotColonizedImage(terminal);
+            }
+        }
 
 
     }
@@ -446,6 +452,9 @@ public class PlanetScreen extends SubScreen {
         }
     }
     public Screen respondToUserInput(KeyEvent key) {
+        if (subscreen != null) {
+            subscreen = subscreen.respondToUserInput(key);
+        } else
         if (typing) {
             switch (key.getKeyCode()) {
                 case (KeyEvent.VK_ESCAPE):
@@ -536,8 +545,8 @@ public class PlanetScreen extends SubScreen {
                     if (show_colonized) {
                         for (Planet planet : galaxy.colonizedBy(player)) {
                             if (galaxy.colonizedBy(player).indexOf(planet) == left_slider) {
-                                planet.abandon();
-                                adjustLS();
+                                //planet.abandon();
+                                //adjustLS();
                                 break;
                             }
                         }
@@ -547,7 +556,7 @@ public class PlanetScreen extends SubScreen {
                     if (!show_colonized) {
                         for (Planet planet : notColPlanets) {
                             if (notColPlanets.indexOf(planet) == left_slider) {
-                                planet.setOwner(player);
+                                subscreen = new ColonyPlanner(player, planet, null, galaxy);
                                 adjustLS();
                                 break;
                             }

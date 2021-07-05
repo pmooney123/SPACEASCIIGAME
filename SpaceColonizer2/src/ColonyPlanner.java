@@ -2,7 +2,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-public class SelectDestinationScreen extends SubScreen {
+public class ColonyPlanner extends SubScreen {
     Galaxy galaxy;
 
     Civ player;
@@ -16,21 +16,26 @@ public class SelectDestinationScreen extends SubScreen {
 
     public int left_slider = 0; //how far into arraylist
 
-    public ArrayList<Star> allPlanets = new ArrayList<>();
+    public ArrayList<Planet> allPlanets = new ArrayList<>();
     public void filterSort(ArrayList<Star> array) {
         array.sort(new DistanceComparator<Star>(fleet ));
         array.sort(new StarFilterComparator(filterText));
 
     }
-    public SelectDestinationScreen(Galaxy world, Civ player, Fleet fleet) {
-        this.galaxy = world;
-        //ArrayList<Star> connected = new ArrayList<>(fleet.currentStar.getConnectedStars());
-        ArrayList<Star> connected = new ArrayList<>(galaxy.allStars);
+    Planet buildPlanet = null;
+    Planet targetPlanet = null;
 
-        allPlanets = connected;
-        allPlanets.sort(new DistanceComparator<>(fleet));
-        this.ls_max = allPlanets.size() - 1;
+    public ColonyPlanner(Civ player, Planet targetPlanet, Planet buildPlanet, Galaxy world) {
+        this.galaxy = world;
+        this.targetPlanet = targetPlanet;
         this.player = player;
+
+        ArrayList<Planet> connected = new ArrayList<>(player.controlledPlanets());
+        allPlanets = connected;
+        System.out.println("con size " + connected.size());
+        allPlanets.sort(new ProductionComparator());
+        this.ls_max = allPlanets.size() - 1;
+
         adjustLS();
         this.fleet = fleet;
     }
@@ -69,10 +74,10 @@ public class SelectDestinationScreen extends SubScreen {
     public void printColonizable(AsciiPanel terminal) {
         int y = 7;
         int index = 0;
-        terminal.write("Select Destination: ", 2, 5, Color.green);
+        terminal.write("Select Planet to Emigrate From (-3 pop): ", 2, 5, Color.green);
 
 
-        for (Star star : allPlanets) {
+        for (Planet planet : allPlanets) {
 
             index++;
             if (y >= AsciiPanel.SCREEN_HEIGHT) {
@@ -80,18 +85,16 @@ public class SelectDestinationScreen extends SubScreen {
             }
             int x = 1;
 
-            if (allPlanets.indexOf(star) == left_slider) {
+            if (allPlanets.indexOf(planet) == left_slider) {
                 terminal.write("<", x, y, Color.cyan);
             }
 
-            terminal.write(star.name, x + 1, y, star.color);
-
-            int distance = (int) fleet.distanceTravel(fleet.currentStar.x, fleet.currentStar.y, star.x, star.y);
+            terminal.write(planet.name, x + 1, y++, planet.habColor());
             //System.out.println("distance" + distance);
-            terminal.write("Distance: " + distance, x + 20, y++, Color.pink);
 
-            if (allPlanets.indexOf(star) == left_slider) {
-                terminal.write(">", x + star.name.length() + 1, y - 1, Color.cyan);
+
+            if (allPlanets.indexOf(planet) == left_slider) {
+                terminal.write(">", x + planet.name.length() + 1, y - 1, Color.cyan);
             }
         }
     }
@@ -152,7 +155,6 @@ public class SelectDestinationScreen extends SubScreen {
                         filterText = filterText.concat(key.getKeyChar() + "");
                     }
             }
-            filterSort(allPlanets);
         }
         else {
             switch (key.getKeyCode()) {
@@ -168,8 +170,10 @@ public class SelectDestinationScreen extends SubScreen {
                 case (KeyEvent.VK_ESCAPE):
                     return null;
                 case (KeyEvent.VK_ENTER):
-                    if (fleet.currentStar != null) {
-                        fleet.setDestination(allPlanets.get(left_slider));
+                    buildPlanet = allPlanets.get(left_slider);
+                    if (buildPlanet.population > 3) {
+                        player.newFleet(buildPlanet.star, 0, targetPlanet.star, true, 3, targetPlanet);
+                        buildPlanet.population -= 3;
                     }
                     return null;
             }

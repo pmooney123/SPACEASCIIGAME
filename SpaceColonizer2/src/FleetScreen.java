@@ -92,10 +92,16 @@ public class FleetScreen extends SubScreen {
                     }
 
                     if (fleet != selectedFleet) {
+                        if (fleet.colonyShip) {
+                            terminal.write("POP: " + fleet.population, xf + 80, yf, Color.green);
+                            terminal.write("Planet: " + fleet.destinationPlanet.name, xf + 88, yf, Color.cyan);
+                        }
                         terminal.write(fleet.name + " " + fleet.total_power + "*", xf, yf, player.color);
                         terminal.write("Location: " + fleet.currentStar.name, xp, yf, fleet.currentStar.politicalColor());
                         if (fleet.hasDestination) {
                             terminal.write("DESTINATION: " + fleet.destinationStar.name, xp + 20, yf, Color.cyan);
+                            terminal.write("Progress: " + fleet.interProgress + "/" + fleet.distanceNeeded, xp + 40, yf, Color.pink);
+
                         }
                         yf++;
 
@@ -106,10 +112,15 @@ public class FleetScreen extends SubScreen {
                         terminal.write("Location: " + fleet.currentStar.name, xp, yf, fleet.currentStar.politicalColor());
                         terminal.write(">", xf + fleet.name.length() + 2 + (fleet.total_power + "").length(), yf, Color.cyan);
 
-                        if (fleet.hasDestination) {
-                            terminal.write("DESTINATION: " + fleet.destinationStar.name, xp + 20, yf, Color.cyan);
+                        if (fleet.colonyShip) {
+                            terminal.write("POP: " + fleet.population, xf + 80, yf, Color.green);
+                            terminal.write("Planet: " + fleet.destinationPlanet.name, xf + 88, yf, Color.cyan);
                         }
-                        yf++;
+                            if (fleet.hasDestination) {
+                            terminal.write("DESTINATION: " + fleet.destinationStar.name, xp + 20, yf, Color.cyan);
+                            terminal.write("Progress: " + fleet.interProgress + "/" + fleet.distanceNeeded, xp + 40, yf, Color.pink);
+
+                        }                        yf++;
 
                         if (typingR) {
                             if (ApplicationMain.count % 10 == 0) {
@@ -237,9 +248,16 @@ public class FleetScreen extends SubScreen {
 
                         break;
                     case (KeyEvent.VK_ENTER):
-                        subscreen = new SelectDestinationScreen(galaxy, player, player.fleets.get(left_slider));
+                        if (player.fleets.size() > 0) {
+                            if (!player.fleets.get(left_slider).colonyShip) {
+                                subscreen = new SelectDestinationScreen(galaxy, player, player.fleets.get(left_slider));
+                            }
+                        }
+                            break;
                     case (KeyEvent.VK_M):
-                        player.fleets.get(left_slider).automerge = !player.fleets.get(left_slider).automerge;
+                        if (!player.fleets.get(left_slider).colonyShip) {
+                            player.fleets.get(left_slider).automerge = !player.fleets.get(left_slider).automerge;
+                        }
                         break;
                     case (KeyEvent.VK_V):
 
